@@ -12,3 +12,11 @@ Para que los sketches reconozcan las librerías de este proyecto, es necesario m
 ```bash
 export ARDUINO_DIRECTORIES_USER=/path/to/repo/Sistema-de-preservacion-del-agua
 ```
+Alternativamente, es posible crear un archivo de configuracion de arduino-cli con el siguiente comando.
+```bash
+arduino-cli config init
+```
+Allí modificaremos el campo "user:" al directorio del repositorio.
+```bash
+user: /path/to/repo/Sistema-de-preservacion-del-agua
+```
