@@ -5,3 +5,18 @@ Para descargar este proyecto, se debe ejecutar el siguiente comando
 ```bash
 git clone https://github.com/Juan-010/Sistema-de-preservacion-del-agua.git <directorio>
 ```
+## Instalacion Arduino-CLI
+Para compilar este proyecto, es necesario instalar arduino-cli. Siga las instrucciones en https://github.com/arduino/arduino-cli
+### Configuración de librerías
+Para que los sketches reconozcan las librerías de este proyecto, es necesario modificar la variable de entorno ARDUINO_DIRECTORIES_USER al valor del path del repositorio.
+```bash
+export ARDUINO_DIRECTORIES_USER=/path/to/repo/Sistema-de-preservacion-del-agua
+```
+Alternativamente, es posible crear un archivo de configuracion de arduino-cli con el siguiente comando.
+```bash
+arduino-cli config init
+```
+Allí modificaremos el campo "user:" al directorio del repositorio.
+```bash
+user: /path/to/repo/Sistema-de-preservacion-del-agua
+```
