@@ -10,5 +10,5 @@ Para compilar este proyecto, es necesario instalar arduino-cli. Siga las instruc
 ### Configuración de librerías
 Para que los sketches reconozcan las librerías de este proyecto, es necesario modificar la variable de entorno ARDUINO_DIRECTORIES_USER al valor del path del repositorio.
 ```bash
-export ARDUINO_DIRECTORIES_USER=/path/to/repo/Sistema-de-preservacion-del-agua/
+export ARDUINO_DIRECTORIES_USER=/path/to/repo/Sistema-de-preservacion-del-agua
 ```
