@@ -1,7 +1,5 @@
-PORT = /dev/ttyACM0
-BOARD = arduino:avr:uno
-
+include ../arduino.mk
 compile:
-	arduino-cli compile -b $(BOARD)
+	arduino-cli compile -b $(FQBN)
 upload:
-	arduino-cli upload -b $(BOARD) -p $(PORT)
+	arduino-cli upload -b $(FQBN) -p $(PORT)
