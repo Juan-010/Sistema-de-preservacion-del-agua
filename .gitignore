@@ -1,6 +1,3 @@
-# Arduino Makefile
-arduino.mk
-
 # Prerequisites
 *.d
 
