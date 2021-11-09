@@ -1,2 +1,2 @@
-PORT = /dev/ttyACM0
+PORT = /dev/cu.usbmodem14101
 FQBN = arduino:avr:uno
