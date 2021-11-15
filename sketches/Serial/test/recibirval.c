@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "termset.h"
 
+unsigned char menuLoop(void);
+
 int main(int argc, char *argv[])
 {
   int flag = 1;
