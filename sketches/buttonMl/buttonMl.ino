@@ -17,14 +17,15 @@ Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
 #define NORMALCONS 128000
 
 //Time
-#define HOUR 3600000
-#define MONINHOURS 720
-#define DAYINHOURS 24
+#define HOUR 1000
+#define MONINHOURS 10
+#define DAYINHOURS 20
 
 void modo(unsigned long, unsigned long, unsigned int);
 void ping(int);
 void oledSetup(int, int, int);
 void configSetup();
+void melodia(int);
 
 unsigned long lastMillis;
 
@@ -68,11 +69,11 @@ void loop() {
 		
 		oled.clearDisplay();
 		
-		oledSetup(0, 10, 1);
-		oled.print("CONFIGURACION");
+		oledSetup(0, 20, 2);
+		oled.print("Ajustes");
 		
-		oledSetup(0, 20, 1);
-		oled.print("GUARDADA");
+		oledSetup(0, 40, 2);
+		oled.print("Guardados");
 		
 		oled.display();
 		delay(200);
@@ -107,22 +108,19 @@ void loop() {
 	
 	//Reset
 	if(horas >= timePeriod){
-		lastMl = mL;
-		mL = 0;
-		
-		ping(BUZZERPIN);
 		oledSetup(0, 30, 2);
 		oled.clearDisplay();
 		oled.print("NUEVO PERIODO");
 		oled.display();
-		delay(1000);
+		if(mL < lastMl)
+			melodia(BUZZERPIN);
+		else
+			ping(BUZZERPIN);
+		lastMl = mL;
+		mL = 0;
 		
-		oledSetup(0, 30, 2);
-		oled.clearDisplay();
-		oled.print(mL);
-		oled.print(" ml.");
-		oled.display();
-
+		delay(1000);
+		modo(mL, lastMl, nModo);
 		horas = 0;
 	}
 }
@@ -139,7 +137,7 @@ void modo(unsigned long mL, unsigned long lastMl, unsigned int nModo){ //Modo No
 			oledSetup(0, 20, 2);
 			oled.clearDisplay();
 			oled.print(mL);
-			oled.print(" ml. de");
+			oled.print(" ml./");
 			
 			oledSetup(0, 40, 2);
 			oled.print(lastMl);
@@ -153,7 +151,7 @@ void modo(unsigned long mL, unsigned long lastMl, unsigned int nModo){ //Modo No
 			oledSetup(0, 20, 2);
 			oled.clearDisplay();
 			oled.print(mL);
-			oled.print(" ml. de");
+			oled.print(" ml./");
 			
 			oledSetup(0, 40, 2);
 			oled.print(NORMALCONS);
@@ -193,4 +191,12 @@ void configSetup(){
 		tiempoAlarma = 10000;
 	else
 		tiempoAlarma = 20000;
+}
+void melodia(int piezo){
+	int notas[] = {523, 660, 784, 784, -1, 660, 784};
+  int tempo[] = {200, 200, 200, 200,200, 200, 1000};
+		for (int i = 0; i < 7; i++) {
+			tone(piezo, notas[i], tempo[i]);
+  		delay(tempo[i]);
+	 	}
 }

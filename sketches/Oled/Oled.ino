@@ -18,8 +18,7 @@ void loop() {
 	oled.setCursor(0,0);
 	oled.setTextSize(1);
 	oled.setCursor(10, 30);
-	oled.setTextSize(1.5);
-	oled.print((float) millis() / 1000);
-	oled.print(" seg.");
+	oled.setTextSize(3);
+	oled.print(":(");
 	oled.display();
 }
