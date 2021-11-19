@@ -7,7 +7,8 @@
 #define HOUR 3600000UL
 #define MONINHOURS 720
 #define DAYINHOURS 24
-#define NORMALCONS 128000 // Normal Consumption
+#define NORMALCONSDAY 58800
+#define NORMALCONSMON 1764000UL// Normal Consumption (daily)
 void oledSetup(int, int, int);
 class Buzzer{
 	public:
@@ -26,6 +27,8 @@ class Valve{
 		unsigned char getModo();
 		unsigned int getAlarma();
 		unsigned int getPeriodo();
+		unsigned long getNormalCons();
+		void setNormalCons();
 		void setConfig(unsigned char);
 		void reset();
 		void addMl(unsigned int addedMl);
@@ -34,5 +37,6 @@ class Valve{
 		unsigned char config;
 		unsigned long mL;
 		unsigned long lastMl;
+		unsigned long normalCons;
 };
 #endif

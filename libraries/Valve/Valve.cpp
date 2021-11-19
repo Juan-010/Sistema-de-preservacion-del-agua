@@ -4,6 +4,7 @@
 #define ANCHO 128
 #define ALTO 64
 #define OLED_RESET 4
+
 Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
 
 //Buzzer
@@ -27,7 +28,17 @@ void Buzzer::melodia(){
 Valve::Valve(){
 	config = 0x29; // 0010 1001 (29)
 	mL = 0;
-	lastMl = NORMALCONS;
+	lastMl = 0;
+	setNormalCons();
+}
+unsigned long Valve::getNormalCons(){
+	return normalCons;
+}
+void Valve::setNormalCons(){
+	if(getPeriodo() == 24)
+		normalCons = NORMALCONSDAY;
+	else
+		normalCons = NORMALCONSMON;
 }
 
 unsigned char Valve::getModo(){
@@ -57,6 +68,7 @@ unsigned int Valve::getPeriodo(){
 
 void Valve::setConfig(unsigned char newConfig){
 	config = newConfig;
+	setNormalCons();
 }
 
 void Valve::reset(){
@@ -81,9 +93,11 @@ void Valve::run(){
 		oled.clearDisplay();
 		oled.print(mL);
 		oled.print(" ml./");
-		
 		oledSetup(0, 40, 2);
-		oled.print(lastMl);
+		if (lastMl == 0)
+			oled.print(normalCons);
+		else
+			oled.print(lastMl);
 		oled.print("ml.");
 		
 		oled.display();
@@ -97,7 +111,7 @@ void Valve::run(){
 		oled.print(" ml./");
 		
 		oledSetup(0, 40, 2);
-		oled.print(NORMALCONS);
+		oled.print(normalCons);
 		oled.print("ml.");
 		
 		oled.display();
