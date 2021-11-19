@@ -5,31 +5,29 @@
 #include "termset.h"
 unsigned char menuLoop(void);
 void printBits(unsigned char);
-int main ( void )
-{
+int main(int argc, char * argv[]){
 	int fd ; /* Descriptor de archivo del puerto */
 	struct termios oldtty, newtty;
-
- 	fd = open ("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_NDELAY );
- 	if( fd == -1)
- 	{
+	if(argc != 2){
+		printf("Uso: %s <port>\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
+ 	fd = open (argv[0], O_RDWR | O_NOCTTY | O_NDELAY );
+ 	if( fd == -1){
  		printf ("El dispositivo no se ha encontrado. Intentelo nuevamente.\n");
- 		return -1;
+ 		exit(EXIT_FAILURE);
  	}
- 	if(termset(fd, 9600, &oldtty, &newtty) == -1)
- 	{
+ 	if(termset(fd, 9600, &oldtty, &newtty) == -1){
  		printf ("Ocurrio un error al inicializar el puerto serie. Intentelo nuevamente.\n");
- 		return -1;
+ 		exit(EXIT_FAILURE);
  	}
  	tcflush (fd, TCIOFLUSH);
 	while(1){
 		unsigned char config = menuLoop();
- 		write (fd , &config , 1);
- 		tcdrain (fd);
+ 		write(fd, &config, 1);
+ 		tcdrain(fd);
  		sleep (1);
  	}
- 	
-	return 0;
 }
 
 unsigned char menuLoop(void){
@@ -53,7 +51,7 @@ unsigned char menuLoop(void){
 				scanf("%hhu", &choice);
 				
 				if(choice >= 1 && choice <= 3){
-					config &= ~(0x7 << 5); 
+					config &= ~(0x7 << 5); //Apaga bits de seccion (Alarma)
 					config |= (1 << (5 + (choice - 1)));
 				}	
 				printBits(config);		
@@ -66,7 +64,7 @@ unsigned char menuLoop(void){
 				scanf("%hhu", &choice);
 				
 				if(choice >= 1 && choice <= 3){
-					config &= ~0x7; 
+					config &= ~0x7; //Apaga bits de seccion (Modo) 
 					config |= (1 << (choice - 1));
 				}	
 				printBits(config);		
@@ -78,8 +76,8 @@ unsigned char menuLoop(void){
 				scanf("%hhu", &choice);
 				
 				if(choice >= 1 && choice <= 2){
-					config &= ~(0x3 << 3); 
-					config |= (1 << 3 + (choice - 1));
+					config &= ~(0x3 << 3); //Apaga bits de seccion (Periodo)
+					config |= (1 << (3 + choice - 1));
 				}	
 				printBits(config);		
 				break;
