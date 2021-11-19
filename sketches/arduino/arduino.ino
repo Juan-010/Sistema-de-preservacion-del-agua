@@ -14,24 +14,30 @@ extern Adafruit_SSD1306 oled;
 Buzzer buzzer(BUZZERPIN);
 Valve valvula;
 unsigned long lastMillis;
+
 void setup() {
 	pinMode(BUTTONPIN, INPUT_PULLUP);
 	pinMode(RELAYPIN, OUTPUT);
 	
+	//OLED Setup
 	Wire.begin();
 	oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 	
-	lastMillis = millis();
+	lastMillis = millis(); //Millis al inicio
 
+	//Config init
 	valvula.setConfig(EEPROM.read(0));
 	Serial.begin(9600);
 }
+
 void loop() {
 	static unsigned int horas = 0;
 	static unsigned int msPrendido = 0;
-	//oled stuff
+	
+	//OLED
 	oledSetup(0, 30, 2);
 	
+	//Configuracion Entrante
 	if(Serial.available() > 0){
 		unsigned char newConf = Serial.read();
 		valvula.setConfig(newConf);
@@ -52,7 +58,7 @@ void loop() {
 		oled.clearDisplay();
 	}
 
-	//Valve handler
+	//Valvula
 	if(!digitalRead(BUTTONPIN)){	
 		digitalWrite(RELAYPIN, 1);
 		delay(250);
@@ -70,7 +76,8 @@ void loop() {
 	//Alarma
 	if(msPrendido >= valvula.getAlarma())
 		buzzer.ping();
-	//Horas counter
+	
+	//Contador de Horas
 	if((millis() - lastMillis) >= HOUR){
 		lastMillis = millis();
 		horas++;
