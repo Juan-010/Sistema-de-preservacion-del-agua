@@ -12,7 +12,7 @@ int main(int argc, char * argv[]){
 		printf("Uso: %s <port>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
- 	fd = open (argv[0], O_RDWR | O_NOCTTY | O_NDELAY );
+ 	fd = open (argv[1], O_RDWR | O_NOCTTY | O_NDELAY );
  	if( fd == -1){
  		printf ("El dispositivo no se ha encontrado. Intentelo nuevamente.\n");
  		exit(EXIT_FAILURE);
