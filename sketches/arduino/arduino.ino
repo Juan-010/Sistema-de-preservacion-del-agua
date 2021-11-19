@@ -4,32 +4,26 @@
 #include <EEPROM.h>
 #include <Valve.h>
 
-extern Adafruit_SSD1306 oled;
-Buzzer buzzer;
-Valve valvula;
-unsigned long lastMillis;
-
 #define BUTTONPIN 4 
 #define RELAYPIN 7
-#define MLPERS 100
+#define BUZZERPIN 8
 
+#define MLPERSEC 140
+
+extern Adafruit_SSD1306 oled;
+Buzzer buzzer(BUZZERPIN);
+Valve valvula;
+unsigned long lastMillis;
 void setup() {
 	pinMode(BUTTONPIN, INPUT_PULLUP);
 	pinMode(RELAYPIN, OUTPUT);
-	pinMode(BUZZERPIN, OUTPUT);
 	
-	//I2C
 	Wire.begin();
-	
-	//OLED
 	oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 	
-	//Ms tracker
 	lastMillis = millis();
 
-	//Config
 	valvula.setConfig(EEPROM.read(0));
-	//Serial
 	Serial.begin(9600);
 }
 void loop() {
@@ -63,7 +57,7 @@ void loop() {
 		digitalWrite(RELAYPIN, 1);
 		delay(250);
 		
-		valvula.addMl(MLPERS/4);
+		valvula.addMl(MLPERSEC/4);
 		valvula.run();
 		msPrendido += 250;
 	}
@@ -84,14 +78,18 @@ void loop() {
 	
 	//Reset
 	if(horas >= valvula.getPeriodo()){
-		oledSetup(0, 30, 2);
+		oledSetup(0, 20, 2);
 		oled.clearDisplay();
-		oled.print("NUEVO PERIODO");
+		oled.print("NUEVO");
+		oledSetup(0, 40, 2);
+		oled.print("PERIODO");
 		oled.display();
+		
 		if(valvula.getMl() < valvula.getLastMl())
 			buzzer.melodia();
 		else
 			buzzer.ping();
+		
 		valvula.reset();
 		delay(1000);
 		valvula.run();

@@ -1,9 +1,15 @@
 #include <Arduino.h>
 #include "Valve.h"
+
+#define ANCHO 128
+#define ALTO 64
+#define OLED_RESET 4
 Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
+
 //Buzzer
 Buzzer::Buzzer(int buzzpin){
 	pin = buzzpin;
+	pinMode(buzzpin, OUTPUT);
 }
 void Buzzer::ping(){
 	tone(pin, 500, 200);
