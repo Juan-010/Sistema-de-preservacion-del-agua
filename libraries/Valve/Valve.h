@@ -1,5 +1,5 @@
 #ifndef VALVE_H
-#define VALVE_H 1
+#define VALVE_H
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
