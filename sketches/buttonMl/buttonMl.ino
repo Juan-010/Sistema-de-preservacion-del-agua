@@ -9,29 +9,114 @@
 #define OLED_RESET 4
 Adafruit_SSD1306 oled(ANCHO, ALTO, &Wire, OLED_RESET);
 
+
+//Time
+#define HOUR 1000
+#define MONINHOURS 15
+#define DAYINHOURS 10
+
+
+	
+void ping(int);
+void oledSetup(int, int, int);
+void melodia(int);
+
+unsigned long lastMillis;
+
 //Valve
 #define BUTTONPIN 4 
 #define RELAYPIN 7
 #define BUZZERPIN 8
 #define MLPERS 100
 #define NORMALCONS 128000
+class Valve{
+	public:
+		Valve(){
+			config = 0x29; // 0010 1001 (29)
+			mL = 0;
+			lastMl = NORMALCONS;
+		}
+		unsigned long getMl(){ return mL; }
+		unsigned long getLastMl() { return lastMl; }
+		unsigned char getModo(){
+			if(config & (1 << 1))
+				return 2;
+			else if(config & (1 << 2))
+				return 3;
+			else
+				return 1;
+		}
+		unsigned int getAlarma(){
+			if(config & (1 << 5))
+				return 5000;
+			else if(config & (1 << 6))
+				return 10000;
+			else
+				return 20000;
+		}
+		unsigned int getPeriodo(){
+			if(config & (1 << 3))
+				return DAYINHOURS; //Diario
+			else
+				return MONINHOURS; //Mensual
+		}
 
-//Time
-#define HOUR 1000
-#define MONINHOURS 10
-#define DAYINHOURS 20
+		void setConfig(unsigned char newConfig){
+			config = newConfig;
+		}
+		void reset(){
+			lastMl = mL;
+			mL = 0;
+		}
+		void addMl(unsigned int addedMl){
+			mL += addedMl;
+		}
 
-void modo(unsigned long, unsigned long, unsigned int);
-void ping(int);
-void oledSetup(int, int, int);
-void configSetup();
-void melodia(int);
+		void run(){
+			if (getModo() == 1) {
+				oledSetup(0, 30, 2);
+				oled.clearDisplay();
+				oled.print(mL);
+				oled.print(" ml.");
+				oled.display();
+			}
+		
+			if (getModo() == 2) {
+				oledSetup(0, 20, 2);
+				oled.clearDisplay();
+				oled.print(mL);
+				oled.print(" ml./");
+				
+				oledSetup(0, 40, 2);
+				oled.print(lastMl);
+				oled.print("ml.");
+				
+				oled.display();
+			}
+			
+			if (getModo() == 3) {
+				
+				oledSetup(0, 20, 2);
+				oled.clearDisplay();
+				oled.print(mL);
+				oled.print(" ml./");
+				
+				oledSetup(0, 40, 2);
+				oled.print(NORMALCONS);
+				oled.print("ml.");
+				
+				oled.display();
+			}
 
-unsigned long lastMillis;
-
+		}
+		
+	private:
+		unsigned char config;
+		unsigned long mL;
+		unsigned long lastMl;
+};
+Valve valvula;
 // Configuracion
-unsigned char config, nModo;
-unsigned int timePeriod, tiempoAlarma;
 
 void setup() {
 	pinMode(BUTTONPIN, INPUT_PULLUP);
@@ -48,23 +133,20 @@ void setup() {
 	lastMillis = millis();
 
 	//Config
-	config = EEPROM.read(0);
-	configSetup();
+	valvula.setConfig(EEPROM.read(0));
 	//Serial
 	Serial.begin(9600);
 }
 void loop() {
-	static unsigned long mL = 0;
-	static unsigned long lastMl = NORMALCONS;
 	static unsigned int horas = 0;
 	static unsigned int msPrendido = 0;
 	//oled stuff
 	oledSetup(0, 30, 2);
 	
 	if(Serial.available() > 0){
-		config = Serial.read();
-		EEPROM.write(0, config);
-		configSetup();
+		unsigned char newConf = Serial.read();
+		valvula.setConfig(newConf);
+		EEPROM.write(0, newConf);
 		ping(BUZZERPIN);
 		
 		oled.clearDisplay();
@@ -86,8 +168,8 @@ void loop() {
 		digitalWrite(RELAYPIN, 1);
 		delay(250);
 		
-		mL += MLPERS/4;
-		modo(mL, lastMl, nModo);
+		valvula.addMl(MLPERS/4);
+		valvula.run();
 		msPrendido += 250;
 	}
 	else{
@@ -97,7 +179,7 @@ void loop() {
 	
 	
 	//Alarma
-	if(msPrendido >= tiempoAlarma)
+	if(msPrendido >= valvula.getAlarma())
 		ping(BUZZERPIN);
 
 	//Horas counter
@@ -107,58 +189,20 @@ void loop() {
 	}
 	
 	//Reset
-	if(horas >= timePeriod){
+	if(horas >= valvula.getPeriodo()){
 		oledSetup(0, 30, 2);
 		oled.clearDisplay();
 		oled.print("NUEVO PERIODO");
 		oled.display();
-		if(mL < lastMl)
+		if(valvula.getMl() < valvula.getLastMl())
 			melodia(BUZZERPIN);
 		else
 			ping(BUZZERPIN);
-		lastMl = mL;
-		mL = 0;
-		
+		valvula.reset();
 		delay(1000);
-		modo(mL, lastMl, nModo);
+		valvula.run();
 		horas = 0;
 	}
-}
-void modo(unsigned long mL, unsigned long lastMl, unsigned int nModo){ //Modo Normal
-		if (nModo == 1) {
-			oledSetup(0, 30, 2);
-			oled.clearDisplay();
-			oled.print(mL);
-			oled.print(" ml.");
-			oled.display();
-		}
-		
-		if (nModo == 2) {
-			oledSetup(0, 20, 2);
-			oled.clearDisplay();
-			oled.print(mL);
-			oled.print(" ml./");
-			
-			oledSetup(0, 40, 2);
-			oled.print(lastMl);
-			oled.print("ml.");
-			
-			oled.display();
-		}
-		
-		if (nModo == 3) {
-			
-			oledSetup(0, 20, 2);
-			oled.clearDisplay();
-			oled.print(mL);
-			oled.print(" ml./");
-			
-			oledSetup(0, 40, 2);
-			oled.print(NORMALCONS);
-			oled.print("ml.");
-			
-			oled.display();
-		}
 }
 void ping(int buzzpin){
 		tone(buzzpin, 500, 200);
@@ -167,30 +211,6 @@ void oledSetup(int x, int y, int sz){
 	oled.setTextColor(WHITE);
 	oled.setCursor(x, y);
 	oled.setTextSize(sz);
-}
-
-void configSetup(){
-	//Modo
-	if(config & (1 << 1))
-		nModo = 2;
-	else if(config & (1 << 2))
-		nModo = 3;
-	else
-		nModo = 1;
-	
-	// Periodo
-	if(config & (1 << 3))
-		timePeriod = DAYINHOURS; //Diario
-	else
-		timePeriod = MONINHOURS; //Mensual
-	
-	//tiempoAlarma
-	if(config & (1 << 5))
-		tiempoAlarma = 5000;
-	else if(config & (1 << 6))
-		tiempoAlarma = 10000;
-	else
-		tiempoAlarma = 20000;
 }
 void melodia(int piezo){
 	int notas[] = {523, 660, 784, 784, -1, 660, 784};
